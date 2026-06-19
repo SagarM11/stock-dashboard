@@ -22,6 +22,9 @@
   th,td{padding:6px 10px;text-align:right;white-space:nowrap;font-variant-numeric:tabular-nums;}
   th.h{color:var(--mut);font-weight:500;font-size:10.5px;text-transform:uppercase;letter-spacing:.4px;border-bottom:1px solid var(--line);cursor:pointer;position:sticky;top:0;background:#10151f;z-index:10;}
   th.h:hover{color:var(--txt);}
+  th.f{position:sticky;top:27px;background:#0d1219;z-index:10;padding:3px 6px;border-bottom:1px solid var(--line);}
+  th.f input{width:74px;padding:3px 6px;font-size:11px;}
+  th.f.sticky{z-index:16;}
   td.l,th.l{text-align:left;}
   td.sticky,th.sticky{position:sticky;left:0;background:var(--bg);z-index:5;}
   th.sticky{background:#10151f;z-index:16;}
@@ -88,6 +91,19 @@ const ts=document.getElementById('asof');ts.textContent='Data as of '+DATA.as_of
 document.getElementById('count').textContent=DATA.count+' futures plays';
 document.getElementById('exp').textContent='Expiries: '+DATA.expiries.map(e=>e.slice(5)).join(', ');
 const ef=document.getElementById('expFilter');DATA.expiries.forEach(e=>{const o=document.createElement('option');o.value=e;o.textContent=e.slice(5);ef.appendChild(o);});
+
+// per-column filters: text=contains, num= >5 <30 >=5 10..20 or plain (>=)
+const colFilters={};
+function numMatch(val,expr){
+  if(val==null) return false;
+  expr=expr.trim();
+  if(expr.includes('..')){const[a,b]=expr.split('..').map(parseFloat);return val>=a&&val<=b;}
+  let m=expr.match(/^(>=|<=|>|<|=)?\s*(-?\d+\.?\d*)$/); if(!m) return true;
+  const op=m[1]||'>=',n=parseFloat(m[2]);
+  return op==='>'?val>n:op==='<'?val<n:op==='<='?val<=n:op==='='?val===n:val>=n;
+}
+function colMatch(r,k,t,expr){ if(!expr) return true; return t==='text'?String(r[k]||'').toLowerCase().includes(expr.toLowerCase()):numMatch(r[k],expr); }
+
 let sortKey='ev_margin_garch',sortDir=-1;
 function render(){
   const q=document.getElementById('search').value.toUpperCase();
@@ -99,18 +115,23 @@ function render(){
     if(xf && r.expiry!==xf) return false;
     if(cf && r.conviction!==cf) return false;
     if(liq && !(r.oi>0)) return false;
+    for(const[k,l,t]of COLS){ if(!colMatch(r,k,t,colFilters[k]||'')) return false; }
     return true;
   });
   rows.sort((a,b)=>{const x=a[sortKey],y=b[sortKey];if(x==null)return 1;if(y==null)return -1;return (typeof x==='string'?x.localeCompare(y):x-y)*sortDir;});
   document.getElementById('shown').textContent=rows.length+' shown';
   let h='<table><thead><tr>';
   COLS.forEach(([k,l,t],i)=>{h+=`<th class="h ${i===0?'sticky':''} ${t==='text'?'l':''}" onclick="setSort('${k}')">${l}${sortKey===k?(sortDir<0?' ▾':' ▴'):''}</th>`;});
+  h+='</tr><tr>';
+  COLS.forEach(([k,l,t],i)=>{const ph=t==='num'?'>0, 10..20':'contains';
+    h+=`<th class="f ${i===0?'sticky':''} ${t==='text'?'l':''}"><input data-k="${k}" placeholder="${ph}" value="${colFilters[k]||''}" oninput="setColFilter('${k}',this.value)"/></th>`;});
   h+='</tr></thead><tbody>';
   for(const r of rows){h+='<tr'+(r.conviction==='weak'?' class=weak':'')+'>';COLS.forEach(([k,l,t,f],i)=>{h+=`<td class="${i===0?'sticky':''} ${t==='text'?'l':''}">${f(r)}</td>`;});h+='</tr>';}
   document.getElementById('table').innerHTML=h+'</tbody></table>';
 }
 function setSort(k){if(sortKey===k)sortDir*=-1;else{sortKey=k;sortDir=-1;}render();}
-function clearF(){document.getElementById('search').value='';document.getElementById('dirFilter').value='';document.getElementById('expFilter').value='';document.getElementById('convFilter').value='';document.getElementById('liq').checked=false;render();}
+function setColFilter(k,v){colFilters[k]=v;render();const el=document.querySelector(`th.f input[data-k="${k}"]`);if(el){el.focus();el.setSelectionRange(v.length,v.length);}}
+function clearF(){for(const k in colFilters)delete colFilters[k];document.getElementById('search').value='';document.getElementById('dirFilter').value='';document.getElementById('expFilter').value='';document.getElementById('convFilter').value='';document.getElementById('liq').checked=false;render();}
 render();
 </script>
 </body></html>

@@ -1,0 +1,113 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<meta http-equiv="refresh" content="600"/>
+<title>X / FinTwit Call Scanner</title>
+<style>
+  :root{--bg:#0b0e14;--panel:#141925;--panel2:#1b2230;--line:#262e3d;--txt:#e6edf3;--mut:#8b97a8;
+        --green:#2ecc71;--red:#ff5c5c;--amber:#ffb74d;--blue:#5b9dff;--accent:#7c5cff;}
+  *{box-sizing:border-box;}
+  body{margin:0;background:var(--bg);color:var(--txt);font:13px/1.5 -apple-system,Segoe UI,Roboto,sans-serif;}
+  header{padding:14px 20px;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:14px;flex-wrap:wrap;position:sticky;top:0;background:var(--bg);z-index:30;}
+  header h1{font-size:17px;margin:0;font-weight:650;}
+  .pill{background:var(--panel2);border:1px solid var(--line);border-radius:20px;padding:4px 12px;color:var(--mut);font-size:12px;}
+  a.nav{color:var(--blue);text-decoration:none;font-size:12px;}
+  .toolbar{display:flex;gap:8px;padding:10px 20px;align-items:center;flex-wrap:wrap;border-bottom:1px solid var(--line);position:sticky;top:55px;background:var(--bg);z-index:25;}
+  input,select{background:var(--panel2);border:1px solid var(--line);color:var(--txt);border-radius:7px;padding:6px 10px;font-size:12px;}
+  .note{padding:8px 20px;background:rgba(124,92,255,.08);border-bottom:1px solid var(--line);color:var(--mut);font-size:11.5px;}
+  .wrap{overflow:auto;height:calc(100vh - 150px);}
+  table{border-collapse:collapse;width:max-content;min-width:100%;}
+  th,td{padding:6px 10px;text-align:right;white-space:nowrap;font-variant-numeric:tabular-nums;}
+  th.h{color:var(--mut);font-weight:500;font-size:10.5px;text-transform:uppercase;letter-spacing:.4px;border-bottom:1px solid var(--line);cursor:pointer;position:sticky;top:0;background:#10151f;z-index:10;}
+  th.h:hover{color:var(--txt);}
+  td.l,th.l{text-align:left;}
+  td.sticky,th.sticky{position:sticky;left:0;background:var(--bg);z-index:5;}
+  th.sticky{background:#10151f;z-index:16;}
+  tbody tr:hover td{background:var(--panel2);}
+  tbody tr td{border-bottom:1px solid #161c28;}
+  .sym{font-weight:600;}
+  .dir{font-size:10px;font-weight:700;padding:1px 6px;border-radius:4px;}
+  .dir-long{color:var(--green);background:rgba(46,204,113,.12);}
+  .dir-short{color:var(--amber);background:rgba(255,183,77,.14);}
+  .dir-watch{color:var(--blue);background:rgba(91,157,255,.12);}
+  .v{font-size:10px;font-weight:700;padding:1px 7px;border-radius:4px;}
+  .v-Clean{color:var(--green);background:rgba(46,204,113,.15);}
+  .v-Watch{color:var(--blue);background:rgba(91,157,255,.13);}
+  .v-Weak{color:var(--amber);background:rgba(255,183,77,.13);}
+  .v-Avoid{color:var(--red);background:rgba(255,92,92,.13);}
+  .v-Unresolved{color:var(--mut);background:var(--panel2);}
+  .pos{color:var(--green);} .neg{color:var(--red);} .mut{color:var(--mut);}
+  .q{font-weight:700;font-size:13px;}
+  .reasons{max-width:360px;white-space:normal;color:var(--mut);font-size:11px;}
+  a.post{color:var(--blue);text-decoration:none;}
+</style>
+</head>
+<body>
+<header>
+  <h1>🐦 X / FinTwit Call Scanner</h1>
+  <span class="pill" id="asof"></span>
+  <span class="pill" id="count"></span>
+  <a class="nav" href="index.html">← Stock dashboard</a>
+  <a class="nav" href="fno.html">F&O →</a>
+</header>
+<div class="toolbar">
+  <input id="search" placeholder="Search ticker / author…" oninput="render()" style="width:200px"/>
+  <select id="dirFilter" onchange="render()"><option value="">All directions</option><option value="long">▲ Long</option><option value="short">▼ Short</option><option value="watch">Watch</option></select>
+  <select id="vFilter" onchange="render()"><option value="">Any verdict</option><option value="Clean">Clean</option><option value="Watch">Watch</option><option value="Weak">Weak</option><option value="Avoid">Avoid</option></select>
+  <label class="mut"><input type="checkbox" id="resOnly" onchange="render()"/> resolved only</label>
+  <button onclick="clearF()" style="background:var(--panel2);border:1px solid var(--line);color:var(--mut);border-radius:7px;padding:6px 12px;cursor:pointer">Clear</button>
+  <span class="mut" id="shown"></span>
+</div>
+<div class="note">🔎 Ranked by <b>setup quality, NOT follower count</b> — R:R from the post's own levels, whether the trigger has fired, stop discipline vs ATR, book-talking / engagement-bait flags, and agreement with the quant scanner. Hover a row's <b>Why</b> for the reasoning. These are <b>scraped third-party calls</b>; the score is structural only; most handles are not SEBI-registered. Not investment advice — your own research only.</div>
+<div class="wrap"><div id="table"></div></div>
+<script>
+const DATA={"as_of": "2026-06-21 12:00", "count": 8, "calls": [{"post_id": "1", "url": "https://x.com/bsridhar00/status/1", "author_handle": "bsridhar00", "author_name": "bsridhar00", "verified": true, "ts_iso": "2026-06-20T10:00:00Z", "text": "ADANIPOWER CMP 232.49 enter upto 224 stop 220 target 241/250", "likes": 22, "reposts": 1, "replies": 1, "views": 2200, "has_chart": true, "is_call": true, "direction": "long", "entry": 224, "stop": 220, "targets": [241, 250], "timeframe": null, "has_stop": true, "holding_disclosed": false, "engagement_bait": false, "confidence": 0.9, "ticker_raw": "ADANIPOWER", "tradingsymbol": "ADANIPOWER", "nse_token": 4451329, "has_futures": true, "company": "Adani Power Ltd.", "industry": "Power", "resolved": true, "stop_atr": 0.5, "trigger_status": "pre-trigger", "scanner_agree": true, "consensus": 1, "close": 220.98, "atr": 7.612590315517863, "vol_ratio": 0.34390584319512385, "scanner_signal": "WATCH", "rr": 4.25, "risk_pct": 1.8, "reward_pct": 7.6, "quality_score": 86, "verdict": "Clean", "reasons": ["healthy R:R 4.25 (risk 1.8% / reward 7.6%)", "sane stop (0.5\u00d7 ATR)", "not triggered yet \u2014 watch", "scanner agrees (signal WATCH)"]}, {"post_id": "4", "url": "https://x.com/tradershub_in/status/4", "author_handle": "tradershub_in", "author_name": "tradershub_in", "verified": true, "ts_iso": "2026-06-20T10:00:00Z", "text": "GRSE double bottom confirmed, keep swing low SL", "likes": 23, "reposts": 1, "replies": 1, "views": 2300, "has_chart": true, "is_call": true, "direction": "long", "entry": null, "stop": null, "targets": [], "timeframe": null, "has_stop": true, "holding_disclosed": false, "engagement_bait": false, "confidence": 0.9, "ticker_raw": "GRSE", "tradingsymbol": "GRSE", "nse_token": 1401601, "has_futures": false, "company": "Garden Reach Shipbuilders & Engineers Ltd.", "industry": "Capital Goods", "resolved": true, "trigger_status": "unknown", "scanner_agree": true, "consensus": 2, "close": 2850.0, "atr": 98.17812612067185, "vol_ratio": 1.4428095336979847, "scanner_signal": "WATCH", "rr": null, "risk_pct": null, "reward_pct": null, "quality_score": 67, "verdict": "Watch", "reasons": ["scanner agrees (signal WATCH)", "volume confirms (1.4\u00d7 avg)"]}, {"post_id": "2", "url": "https://x.com/voltricsX/status/2", "author_handle": "voltricsX", "author_name": "voltricsX", "verified": true, "ts_iso": "2026-06-20T10:00:00Z", "text": "Mazagon Dock CMP 2552 SL 2282 Target 2800/3100/3290", "likes": 29, "reposts": 1, "replies": 1, "views": 2900, "has_chart": true, "is_call": true, "direction": "long", "entry": 2552, "stop": 2282, "targets": [2800, 3100, 3290], "timeframe": null, "has_stop": true, "holding_disclosed": false, "engagement_bait": false, "confidence": 0.9, "ticker_raw": "MAZDOCK", "tradingsymbol": "MAZDOCK", "nse_token": 130305, "has_futures": true, "company": "Mazagoan Dock Shipbuilders Ltd.", "industry": "Capital Goods", "resolved": true, "stop_atr": 4.0, "trigger_status": "actionable", "scanner_agree": true, "consensus": 1, "close": 2544.9, "atr": 67.44448189538494, "vol_ratio": 0.7189498073250226, "scanner_signal": "BUY", "rr": 0.92, "risk_pct": 10.6, "reward_pct": 9.7, "quality_score": 56, "verdict": "Watch", "reasons": ["poor R:R 0.92 \u2014 stop wider than first target", "sane stop (4.0\u00d7 ATR)", "at an actionable level", "scanner agrees (signal BUY)"]}, {"post_id": "7", "url": "https://x.com/guidemetrade/status/7", "author_handle": "guidemetrade", "author_name": "guidemetrade", "verified": true, "ts_iso": "2026-06-20T10:00:00Z", "text": "Bank of Baroda CMP 281 Target 310. Can it hit? YES/REPOST", "likes": 40, "reposts": 1, "replies": 1, "views": 4000, "has_chart": true, "is_call": true, "direction": "long", "entry": 281, "stop": null, "targets": [310], "timeframe": null, "has_stop": false, "holding_disclosed": false, "engagement_bait": true, "confidence": 0.9, "ticker_raw": "Bank of Baroda", "tradingsymbol": "BANKBARODA", "nse_token": 1195009, "has_futures": true, "company": "Bank of Baroda", "industry": "Financial Services", "resolved": true, "trigger_status": "actionable", "scanner_agree": true, "consensus": 1, "close": 282.85, "atr": 7.139626919878956, "vol_ratio": 0.4046508606212387, "scanner_signal": "BUY", "rr": null, "risk_pct": null, "reward_pct": null, "quality_score": 36, "verdict": "Avoid", "reasons": ["no stop loss stated", "at an actionable level", "engagement-bait framing", "scanner agrees (signal BUY)"]}, {"post_id": "3", "url": "https://x.com/T_investopedia/status/3", "author_handle": "T_investopedia", "author_name": "T_investopedia", "verified": true, "ts_iso": "2026-06-20T10:00:00Z", "text": "GRSE fresh buy cmp 2800 target 4000+, already holding", "likes": 57, "reposts": 1, "replies": 1, "views": 5700, "has_chart": true, "is_call": true, "direction": "long", "entry": 2800, "stop": null, "targets": [4000], "timeframe": null, "has_stop": false, "holding_disclosed": true, "engagement_bait": false, "confidence": 0.9, "ticker_raw": "GRSE", "tradingsymbol": "GRSE", "nse_token": 1401601, "has_futures": false, "company": "Garden Reach Shipbuilders & Engineers Ltd.", "industry": "Capital Goods", "resolved": true, "trigger_status": "actionable", "scanner_agree": true, "consensus": 2, "close": 2850.0, "atr": 98.17812612067185, "vol_ratio": 1.4428095336979847, "scanner_signal": "WATCH", "rr": null, "risk_pct": null, "reward_pct": null, "quality_score": 35, "verdict": "Avoid", "reasons": ["no stop loss stated", "at an actionable level", "author already holds it (talking their book)", "+43% target with no stop", "scanner agrees (signal WATCH)", "volume confirms (1.4\u00d7 avg)"]}, {"post_id": "5", "url": "https://x.com/Surendraanalyst/status/5", "author_handle": "Surendraanalyst", "author_name": "Surendraanalyst", "verified": true, "ts_iso": "2026-06-20T10:00:00Z", "text": "BankNifty Cmp 57588 target 58500/59500/62000 SL 50k", "likes": 101, "reposts": 1, "replies": 1, "views": 10100, "has_chart": true, "is_call": true, "direction": "long", "entry": 57588, "stop": 50000, "targets": [58500, 59500, 62000], "timeframe": null, "has_stop": true, "holding_disclosed": false, "engagement_bait": false, "confidence": 0.9, "ticker_raw": "Banknifty", "tradingsymbol": null, "nse_token": null, "has_futures": false, "company": "", "industry": "", "resolved": false, "trigger_status": "unknown", "scanner_agree": null, "consensus": 1, "close": null, "atr": null, "vol_ratio": null, "scanner_signal": null, "rr": 0.12, "risk_pct": 13.2, "reward_pct": 1.6, "quality_score": 32, "verdict": "Unresolved", "reasons": ["poor R:R 0.12 \u2014 stop wider than first target"]}, {"post_id": "6", "url": "https://x.com/Yuvraj_77/status/6", "author_handle": "Yuvraj_77", "author_name": "Yuvraj_77", "verified": true, "ts_iso": "2026-06-20T10:00:00Z", "text": "SWSOLAR CMP 235 knocking on breakout door", "likes": 28, "reposts": 1, "replies": 1, "views": 2800, "has_chart": true, "is_call": true, "direction": "watch", "entry": 235, "stop": null, "targets": [], "timeframe": null, "has_stop": false, "holding_disclosed": false, "engagement_bait": false, "confidence": 0.9, "ticker_raw": "SWSOLAR", "tradingsymbol": "SWSOLAR", "nse_token": 3197185, "has_futures": false, "company": "Sterling and Wilson Renewable Energy Ltd.", "industry": "Construction", "resolved": true, "trigger_status": "pre-trigger", "scanner_agree": null, "consensus": 1, "close": 221.99, "atr": 9.04381741177419, "vol_ratio": 1.0650581505367547, "scanner_signal": "BUY", "rr": null, "risk_pct": null, "reward_pct": null, "quality_score": 30, "verdict": "Avoid", "reasons": ["no stop loss stated", "not triggered yet \u2014 watch"]}, {"post_id": "8", "url": "https://x.com/jitendrakirar21/status/8", "author_handle": "jitendrakirar21", "author_name": "jitendrakirar21", "verified": true, "ts_iso": "2026-06-20T10:00:00Z", "text": "Kronox CMP 154 breakout above 145-148", "likes": 30, "reposts": 1, "replies": 1, "views": 3000, "has_chart": true, "is_call": true, "direction": "long", "entry": 154, "stop": null, "targets": [], "timeframe": null, "has_stop": false, "holding_disclosed": false, "engagement_bait": false, "confidence": 0.9, "ticker_raw": "KRONOX", "tradingsymbol": null, "nse_token": null, "has_futures": false, "company": "", "industry": "", "resolved": false, "trigger_status": "unknown", "scanner_agree": null, "consensus": 1, "close": null, "atr": null, "vol_ratio": null, "scanner_signal": null, "rr": null, "risk_pct": null, "reward_pct": null, "quality_score": 30, "verdict": "Unresolved", "reasons": ["no stop loss stated"]}]};
+const fmt=(v,d=2)=>v==null?'—':Number(v).toLocaleString('en-IN',{minimumFractionDigits:d,maximumFractionDigits:d});
+const fmtK=v=>v==null?'—':(v>=1e6?(v/1e6).toFixed(1)+'M':v>=1e3?(v/1e3).toFixed(1)+'K':String(v));
+const COLS=[
+  ['quality_score','Quality','num', r=>`<span class="q ${r.quality_score>=70?'pos':r.quality_score<40?'neg':'mut'}">${r.quality_score==null?'—':r.quality_score}</span>`],
+  ['verdict','Verdict','text', r=>`<span class="v v-${r.verdict}">${r.verdict}</span>`],
+  ['tradingsymbol','Ticker','text', r=>`<span class="sym">${r.tradingsymbol||('<span class=mut>'+(r.ticker_raw||'?')+'</span>')}</span>`],
+  ['direction','Dir','text', r=>`<span class="dir dir-${r.direction}">${r.direction==='short'?'▼ SHORT':r.direction==='long'?'▲ LONG':r.direction}</span>`],
+  ['author_handle','Author','text', r=>`@${r.author_handle||'?'}${r.verified?' ✓':''} <span class=mut>(${fmtK(r.likes)}♥)</span>`],
+  ['entry','Entry','num', r=>fmt(r.entry,1)],
+  ['stop','SL','num', r=>r.stop==null?'<span class=neg>none</span>':fmt(r.stop,1)],
+  ['target1','T1','num', r=>fmt((r.targets||[])[0],1)],
+  ['rr','R:R','num', r=>r.rr==null?'—':`<span class="${r.rr>=1.5?'pos':r.rr<1?'neg':'mut'}">${fmt(r.rr,2)}</span>`],
+  ['trigger_status','Trigger','text', r=>`<span class="${r.trigger_status==='actionable'?'pos':r.trigger_status==='extended'?'neg':'mut'}">${r.trigger_status||'—'}</span>`],
+  ['scanner_signal','Scanner','text', r=>r.scanner_signal?`${r.scanner_signal} ${r.scanner_agree?'✓':r.scanner_agree===false?'✗':''}`:'<span class=mut>—</span>'],
+  ['consensus','#Acc','num', r=>r.consensus||1],
+  ['close','LTP','num', r=>fmt(r.close,1)],
+  ['reasons','Why','text', r=>`<span class="reasons">${(r.reasons||[]).join(' · ')}</span>`],
+  ['url','↗','text', r=>r.url?`<a class="post" href="${r.url}" target="_blank">open</a>`:''],
+];
+document.getElementById('asof').textContent='Captured '+DATA.as_of;
+document.getElementById('count').textContent=DATA.count+' calls';
+const colFilters={};
+let sortKey='quality_score',sortDir=-1;
+function render(){
+  const q=document.getElementById('search').value.toUpperCase();
+  const df=document.getElementById('dirFilter').value, vf=document.getElementById('vFilter').value;
+  const ro=document.getElementById('resOnly').checked;
+  let rows=DATA.calls.filter(r=>{
+    if(q && !((r.tradingsymbol||'').toUpperCase().includes(q)||(r.ticker_raw||'').toUpperCase().includes(q)||(r.author_handle||'').toUpperCase().includes(q))) return false;
+    if(df && r.direction!==df) return false;
+    if(vf && r.verdict!==vf) return false;
+    if(ro && !r.resolved) return false;
+    return true;
+  });
+  rows.sort((a,b)=>{const x=a[sortKey],y=b[sortKey];if(x==null)return 1;if(y==null)return -1;return (typeof x==='string'?String(x).localeCompare(String(y)):x-y)*sortDir;});
+  document.getElementById('shown').textContent=rows.length+' shown';
+  let h='<table><thead><tr>';
+  COLS.forEach(([k,l,t],i)=>{h+=`<th class="h ${i===0?'sticky':''} ${t==='text'?'l':''}" onclick="setSort('${k}')">${l}${sortKey===k?(sortDir<0?' ▾':' ▴'):''}</th>`;});
+  h+='</tr></thead><tbody>';
+  for(const r of rows){h+='<tr>';COLS.forEach(([k,l,t,f],i)=>{h+=`<td class="${i===0?'sticky':''} ${t==='text'?'l':''}">${f(r)}</td>`;});h+='</tr>';}
+  document.getElementById('table').innerHTML=h+'</tbody></table>';
+}
+function setSort(k){if(sortKey===k)sortDir*=-1;else{sortKey=k;sortDir=-1;}render();}
+function clearF(){document.getElementById('search').value='';document.getElementById('dirFilter').value='';document.getElementById('vFilter').value='';document.getElementById('resOnly').checked=false;render();}
+render();
+</script>
+</body></html>

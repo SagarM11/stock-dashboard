@@ -6,50 +6,34 @@ header{padding:14px 20px;border-bottom:1px solid var(--line);display:flex;gap:12
 h1{font-size:17px;margin:0}.pill{background:var(--panel2);border:1px solid var(--line);border-radius:20px;padding:4px 12px;color:var(--mut);font-size:12px}
 .note{padding:9px 20px;color:var(--amber);font-size:12px;background:rgba(255,183,77,.07);border-bottom:1px solid var(--line)}
 #tbl{overflow-x:auto;-webkit-overflow-scrolling:touch}
-table{width:100%;border-collapse:collapse;min-width:900px}th,td{padding:8px 11px;text-align:right;white-space:nowrap}
+table{width:100%;border-collapse:collapse;min-width:820px}th,td{padding:8px 11px;text-align:right;white-space:nowrap}
 td.l,th.l{text-align:left}th{color:var(--mut);font-size:10.5px;text-transform:uppercase;border-bottom:1px solid var(--line);position:sticky;top:0;background:#10151f}
 td{border-bottom:1px solid #161c28}tbody tr:hover td{background:var(--panel2)}
-.nm{font-weight:700}.sme{font-size:9px;color:#1a1200;background:var(--amber);padding:1px 5px;border-radius:3px;margin-left:6px}
-.open{font-size:9px;color:#08110a;background:var(--green);padding:1px 6px;border-radius:3px;font-weight:700}
-.upc{font-size:9px;color:var(--mut);background:var(--panel2);border:1px solid var(--line);padding:1px 6px;border-radius:3px}
-.gmp-pos{color:var(--green);font-weight:700}.gmp-neg{color:var(--red);font-weight:700}.mut{color:var(--mut)}
-.range{font-weight:700}.rg{color:var(--green)}.rr{color:var(--red)}
+.nm{font-weight:700}.gmp-pos{color:var(--green);font-weight:700}.z{color:var(--mut)}.mut{color:var(--mut)}
+.range{font-weight:700}.rg{color:var(--green)}.rr{color:var(--red)}.med{color:var(--blue);font-weight:700}
 @media(max-width:760px){header{padding:10px 12px}h1{font-size:15px}th,td{padding:7px 8px;font-size:12px}.note{padding:8px 12px}}
 </style></head><body><nav class="xnav" style="display:flex;gap:6px;overflow-x:auto;-webkit-overflow-scrolling:touch;padding:8px 14px;border-bottom:1px solid #262e3d;background:#0b0e14;align-items:center;"><a href="index.html" style="text-decoration:none;flex:0 0 auto;border:1px solid #262e3d;border-radius:8px;padding:6px 13px;font-size:12.5px;font-weight:600;white-space:nowrap;color:#8b97a8;background:#1b2230;">📊&nbsp;Dashboard</a><a href="fno.html" style="text-decoration:none;flex:0 0 auto;border:1px solid #262e3d;border-radius:8px;padding:6px 13px;font-size:12.5px;font-weight:600;white-space:nowrap;color:#8b97a8;background:#1b2230;">⚡&nbsp;F&O</a><a href="radar.html" style="text-decoration:none;flex:0 0 auto;border:1px solid #262e3d;border-radius:8px;padding:6px 13px;font-size:12.5px;font-weight:600;white-space:nowrap;color:#8b97a8;background:#1b2230;">🚀&nbsp;Radar</a><a href="ignitions.html" style="text-decoration:none;flex:0 0 auto;border:1px solid #262e3d;border-radius:8px;padding:6px 13px;font-size:12.5px;font-weight:600;white-space:nowrap;color:#8b97a8;background:#1b2230;">⚡&nbsp;Ignitions</a><a href="ipo.html" style="text-decoration:none;flex:0 0 auto;border:1px solid #262e3d;border-radius:8px;padding:6px 13px;font-size:12.5px;font-weight:600;white-space:nowrap;background:#7c5cff;color:#fff;border-color:#7c5cff;">🆕&nbsp;IPO Monitor</a><a href="x_signals.html" style="text-decoration:none;flex:0 0 auto;border:1px solid #262e3d;border-radius:8px;padding:6px 13px;font-size:12.5px;font-weight:600;white-space:nowrap;color:#8b97a8;background:#1b2230;">🐦&nbsp;X Signals</a></nav>
-<header><h1>🆕 IPO Monitor</h1><span class="pill" id="cnt"></span><span class="pill" id="gen"></span></header>
-<div class="note">GMP = <b>unofficial grey-market premium</b> (speculative, updates through the day). The listing-gain range blends GMP% with subscription demand — a <b>scenario, not a forecast</b>. Weak subscription = GMP often doesn't hold. Not investment advice.</div>
-<div id="setup" style="display:none;padding:40px 20px;text-align:center;color:var(--mut)">
-  <div style="font-size:15px;color:var(--txt);margin-bottom:10px">IPO Monitor needs a (free) IPO Guru API key</div>
-  1. Register free at <a href="https://www.ipoguru.in" style="color:var(--blue)">ipoguru.in</a> → get your API key<br>
-  2. Add <code style="color:var(--amber)">IPOGURU_API_KEY=your_key</code> to api_credentials.txt<br>
-  3. Run <code style="color:var(--amber)">python3 ipo_monitor.py</code> (or wait for the scheduled routine)
-</div>
+<header><h1>🆕 IPO Monitor</h1><span class="pill" id="cnt"></span><span class="pill" id="hist"></span><span class="pill" id="gen"></span></header>
+<div class="note">GMP = <b>unofficial grey-market premium</b> (speculative, updates through the day). <b>Est. listing gain</b> is EMPIRICAL — the 25th–75th percentile (and median) of what past IPOs at a similar GMP level <b>actually</b> did on listing day. A historical-outcome scenario, <b>not a forecast</b>. Not investment advice. Source: ipowatch.in</div>
 <div id="tbl"></div>
 <script>
-const DATA={"generated": "2026-08-10 18:35", "ipos": [], "no_key": true};
-if(DATA.no_key){document.getElementById('setup').style.display='block';document.getElementById('cnt').textContent='setup required';}
-else{
+const DATA={"generated": "2026-08-10 18:41", "ipos": [{"name": "LAPL Automotive", "gmp_rs": 37.0, "gmp_pct": 39.4, "price": 94.0, "price_band": "\u20b994", "their_est": "\u20b9131 (39.36%)", "dates": "6-10 August", "est_lo": 26.7, "est_med": 35.6, "est_hi": 45.9, "est_lo_px": 119, "est_hi_px": 137}, {"name": "Ardee Industries", "gmp_rs": 16.0, "gmp_pct": 30.2, "price": 53.0, "price_band": "\u20b953", "their_est": "\u20b969 (30.19%)", "dates": "5-7 August", "est_lo": 17.8, "est_med": 27.5, "est_hi": 35.1, "est_lo_px": 62, "est_hi_px": 72}, {"name": "Dhoot Transmission", "gmp_rs": 259.0, "gmp_pct": 29.7, "price": 871.0, "price_band": "\u20b9871", "their_est": "\u20b91130 (29.74%)", "dates": "10-12 August", "est_lo": 17.8, "est_med": 27.0, "est_hi": 33.3, "est_lo_px": 1026, "est_hi_px": 1161}, {"name": "Shiprocket", "gmp_rs": 22.0, "gmp_pct": 22.7, "price": 97.0, "price_band": "\u20b997", "their_est": "\u20b9119 (22.68%)", "dates": "12-14 August", "est_lo": 12.3, "est_med": 15.8, "est_hi": 21.2, "est_lo_px": 109, "est_hi_px": 118}, {"name": "Anawil Wire & Engineering", "gmp_rs": 58.0, "gmp_pct": 21.5, "price": 270.0, "price_band": "\u20b9270", "their_est": "\u20b9328 (21.48%)", "dates": "3-5 August", "est_lo": 11.4, "est_med": 15.2, "est_hi": 20.5, "est_lo_px": 301, "est_hi_px": 325}, {"name": "G.V. Electricals", "gmp_rs": 26.0, "gmp_pct": 20.0, "price": 130.0, "price_band": "\u20b9130", "their_est": "\u20b9156 (20.00%)", "dates": "31-7 August", "est_lo": 11.5, "est_med": 15.8, "est_hi": 20.5, "est_lo_px": 145, "est_hi_px": 157}, {"name": "Milky Mist", "gmp_rs": 26.0, "gmp_pct": 18.6, "price": 140.0, "price_band": "\u20b9140", "their_est": "\u20b9166 (18.57%)", "dates": "11-13 August", "est_lo": 7.6, "est_med": 14.4, "est_hi": 20.2, "est_lo_px": 151, "est_hi_px": 168}, {"name": "Behari Lal Engineering", "gmp_rs": 49.0, "gmp_pct": 17.2, "price": 285.0, "price_band": "\u20b9285", "their_est": "\u20b9334 (17.19%)", "dates": "12-14 August", "est_lo": 4.2, "est_med": 14.0, "est_hi": 20.5, "est_lo_px": 297, "est_hi_px": 343}, {"name": "Molbio Diagnostics", "gmp_rs": 132.0, "gmp_pct": 16.4, "price": 807.0, "price_band": "\u20b9807", "their_est": "\u20b9939 (16.36%)", "dates": "10-12 August", "est_lo": 3.5, "est_med": 11.6, "est_hi": 20.5, "est_lo_px": 835, "est_hi_px": 972}, {"name": "Aegeus Technologies", "gmp_rs": 12.0, "gmp_pct": 11.4, "price": 105.0, "price_band": "\u20b9105", "their_est": "\u20b9117 (11.43%)", "dates": "4-6 August", "est_lo": 2.2, "est_med": 8.6, "est_hi": 12.4, "est_lo_px": 107, "est_hi_px": 118}, {"name": "Technocraft Ventures", "gmp_rs": 23.0, "gmp_pct": 10.8, "price": 212.0, "price_band": "\u20b9212", "their_est": "\u20b9235 (10.85%)", "dates": "7-11 August", "est_lo": 1.9, "est_med": 7.2, "est_hi": 11.5, "est_lo_px": 216, "est_hi_px": 236}, {"name": "Q&T Foods", "gmp_rs": 12.0, "gmp_pct": 10.4, "price": 115.0, "price_band": "\u20b9115", "their_est": "\u20b9127 (10.43%)", "dates": "12-14 August", "est_lo": 0.5, "est_med": 6.6, "est_hi": 10.5, "est_lo_px": 116, "est_hi_px": 127}, {"name": "LEAP India", "gmp_rs": 16.0, "gmp_pct": 10.1, "price": 159.0, "price_band": "\u20b9159", "their_est": "\u20b9175 (10.06%)", "dates": "7-11 August", "est_lo": 0.5, "est_med": 6.6, "est_hi": 10.5, "est_lo_px": 160, "est_hi_px": 176}, {"name": "Optimystix Entertainment", "gmp_rs": 5.0, "gmp_pct": 2.9, "price": 175.0, "price_band": "\u20b9175", "their_est": "\u20b9180 (2.86%)", "dates": "7-11 August", "est_lo": -4.2, "est_med": 0.0, "est_hi": 4.1, "est_lo_px": 168, "est_hi_px": 182}, {"name": "Credent Connect N Care", "gmp_rs": 0.0, "gmp_pct": 0.0, "price": 189.0, "price_band": "\u20b9189", "their_est": "\u20b9- (0.00%)", "dates": "13-17 August", "est_lo": -9.9, "est_med": -3.2, "est_hi": 0.0, "est_lo_px": 170, "est_hi_px": 189}, {"name": "Pramodini Medicare", "gmp_rs": 0.0, "gmp_pct": 0.0, "price": 118.0, "price_band": "\u20b9118", "their_est": "\u20b9- (0.00%)", "dates": "12-14 August", "est_lo": -9.9, "est_med": -3.2, "est_hi": 0.0, "est_lo_px": 106, "est_hi_px": 118}, {"name": "Sham Foam", "gmp_rs": 0.0, "gmp_pct": 0.0, "price": 130.0, "price_band": "\u20b9130", "their_est": "\u20b9- (0.00%)", "dates": "11-13 August", "est_lo": -9.9, "est_med": -3.2, "est_hi": 0.0, "est_lo_px": 117, "est_hi_px": 130}, {"name": "Fascinate Textiles", "gmp_rs": 0.0, "gmp_pct": 0.0, "price": 156.0, "price_band": "\u20b9156", "their_est": "\u20b9- (0.00%)", "dates": "11-13 August", "est_lo": -9.9, "est_med": -3.2, "est_hi": 0.0, "est_lo_px": 141, "est_hi_px": 156}], "n_hist": 290};
 document.getElementById('cnt').textContent=DATA.ipos.length+' IPOs';
+document.getElementById('hist').textContent='calibrated on '+DATA.n_hist+' past listings';
 document.getElementById('gen').textContent='updated '+DATA.generated;
 const fmt=(v,d=0)=>v==null?'—':Number(v).toLocaleString('en-IN',{minimumFractionDigits:d,maximumFractionDigits:d});
-function rng(r){if(r.est_lo==null)return '<span class=mut>—</span>';
-  const c=r.est_hi<0?'rr':'rg';
-  return `<span class="range ${c}">${r.est_lo>0?'+':''}${r.est_lo}% … ${r.est_hi>0?'+':''}${r.est_hi}%</span>`+
-    (r.est_lo_px?`<div class=mut style=font-size:10.5px>₹${fmt(r.est_lo_px)}–${fmt(r.est_hi_px)}</div>`:'');}
 function gmp(r){if(r.gmp_pct==null)return '<span class=mut>—</span>';
-  const c=r.gmp_pct>=0?'gmp-pos':'gmp-neg';
-  return `<span class="${c}">${r.gmp_rs!=null?'₹'+fmt(r.gmp_rs):''} (${r.gmp_pct>=0?'+':''}${r.gmp_pct}%)</span>`;}
-let h='<table><thead><tr><th class=l>IPO</th><th>Status</th><th>Price band</th><th>GMP</th>'+
- '<th>Est. Listing Gain</th><th>Sub (x)</th><th>QIB/NII/Ret</th><th>Open</th><th>Close</th><th>Listing</th><th class=l>Size</th></tr></thead><tbody>';
-if(!DATA.ipos.length)h+='<tr><td colspan=11 style="text-align:center;color:#8b97a8;padding:30px">No open or upcoming IPOs right now</td></tr>';
+  if(r.gmp_rs===0||r.gmp_pct===0)return '<span class=z>₹0</span>';
+  return `<span class="gmp-pos">₹${fmt(r.gmp_rs)} (+${r.gmp_pct}%)</span>`;}
+function rng(r){if(r.est_lo==null)return '<span class=mut>—</span>';
+  return `<span class="range ${r.est_med>=0?'rg':'rr'}">${r.est_lo>0?'+':''}${r.est_lo}% … ${r.est_hi>0?'+':''}${r.est_hi}%</span>`+
+    ` <span class=med>(med ${r.est_med>0?'+':''}${r.est_med}%)</span>`+
+    (r.est_lo_px?`<div class=mut style=font-size:10.5px>₹${fmt(r.est_lo_px)}–${fmt(r.est_hi_px)}</div>`:'');}
+let h='<table><thead><tr><th class=l>IPO</th><th>Price</th><th>GMP</th><th class=l>Est. Listing Gain (empirical)</th><th class=l>ipowatch est</th><th class=l>Dates</th></tr></thead><tbody>';
+if(!DATA.ipos.length)h+='<tr><td colspan=6 style="text-align:center;color:#8b97a8;padding:30px">No IPOs with GMP data right now</td></tr>';
 for(const r of DATA.ipos){
- const st=r.status==='open'?'<span class=open>OPEN</span>':'<span class=upc>UPCOMING</span>';
- const sme=r.type&&r.type.toUpperCase().includes('SME')?'<span class=sme>SME</span>':'';
- h+=`<tr><td class="l nm">${r.name||'—'}${sme}</td><td>${st}</td><td>${r.price_band||'—'}</td>`+
-   `<td>${gmp(r)}</td><td class=l>${rng(r)}</td><td>${fmt(r.sub_total,1)}${r.sub_total!=null?'x':''}</td>`+
-   `<td class=mut style=font-size:11px>${fmt(r.sub_qib,1)}/${fmt(r.sub_nii,1)}/${fmt(r.sub_retail,1)}</td>`+
-   `<td>${r.open||'—'}</td><td>${r.close||'—'}</td><td>${r.listing||'—'}</td><td class="l mut">${r.issue_size||'—'}</td></tr>`;
+ h+=`<tr><td class="l nm">${r.name}</td><td>${r.price?'₹'+fmt(r.price):'—'}</td><td>${gmp(r)}</td>`+
+   `<td class=l>${rng(r)}</td><td class="l mut">${r.their_est||'—'}</td><td class="l mut">${r.dates||'—'}</td></tr>`;
 }
 document.getElementById('tbl').innerHTML=h+'</tbody></table>';
-}
 </script></body></html>

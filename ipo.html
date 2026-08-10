@@ -1,0 +1,55 @@
+<!doctype html><html><head><meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/><title>IPO Monitor</title><style>
+:root{--bg:#0b0e14;--line:#262e3d;--panel2:#1b2230;--txt:#e6edf3;--mut:#8b97a8;--green:#2ecc71;--amber:#ffb74d;--red:#ff5c5c;--blue:#5b9dff}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--txt);font:13px/1.5 -apple-system,Segoe UI,Roboto,sans-serif;-webkit-text-size-adjust:100%;overflow-x:hidden}
+header{padding:14px 20px;border-bottom:1px solid var(--line);display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+h1{font-size:17px;margin:0}.pill{background:var(--panel2);border:1px solid var(--line);border-radius:20px;padding:4px 12px;color:var(--mut);font-size:12px}
+.note{padding:9px 20px;color:var(--amber);font-size:12px;background:rgba(255,183,77,.07);border-bottom:1px solid var(--line)}
+#tbl{overflow-x:auto;-webkit-overflow-scrolling:touch}
+table{width:100%;border-collapse:collapse;min-width:900px}th,td{padding:8px 11px;text-align:right;white-space:nowrap}
+td.l,th.l{text-align:left}th{color:var(--mut);font-size:10.5px;text-transform:uppercase;border-bottom:1px solid var(--line);position:sticky;top:0;background:#10151f}
+td{border-bottom:1px solid #161c28}tbody tr:hover td{background:var(--panel2)}
+.nm{font-weight:700}.sme{font-size:9px;color:#1a1200;background:var(--amber);padding:1px 5px;border-radius:3px;margin-left:6px}
+.open{font-size:9px;color:#08110a;background:var(--green);padding:1px 6px;border-radius:3px;font-weight:700}
+.upc{font-size:9px;color:var(--mut);background:var(--panel2);border:1px solid var(--line);padding:1px 6px;border-radius:3px}
+.gmp-pos{color:var(--green);font-weight:700}.gmp-neg{color:var(--red);font-weight:700}.mut{color:var(--mut)}
+.range{font-weight:700}.rg{color:var(--green)}.rr{color:var(--red)}
+@media(max-width:760px){header{padding:10px 12px}h1{font-size:15px}th,td{padding:7px 8px;font-size:12px}.note{padding:8px 12px}}
+</style></head><body><nav class="xnav" style="display:flex;gap:6px;overflow-x:auto;-webkit-overflow-scrolling:touch;padding:8px 14px;border-bottom:1px solid #262e3d;background:#0b0e14;align-items:center;"><a href="index.html" style="text-decoration:none;flex:0 0 auto;border:1px solid #262e3d;border-radius:8px;padding:6px 13px;font-size:12.5px;font-weight:600;white-space:nowrap;color:#8b97a8;background:#1b2230;">📊&nbsp;Dashboard</a><a href="fno.html" style="text-decoration:none;flex:0 0 auto;border:1px solid #262e3d;border-radius:8px;padding:6px 13px;font-size:12.5px;font-weight:600;white-space:nowrap;color:#8b97a8;background:#1b2230;">⚡&nbsp;F&O</a><a href="radar.html" style="text-decoration:none;flex:0 0 auto;border:1px solid #262e3d;border-radius:8px;padding:6px 13px;font-size:12.5px;font-weight:600;white-space:nowrap;color:#8b97a8;background:#1b2230;">🚀&nbsp;Radar</a><a href="ignitions.html" style="text-decoration:none;flex:0 0 auto;border:1px solid #262e3d;border-radius:8px;padding:6px 13px;font-size:12.5px;font-weight:600;white-space:nowrap;color:#8b97a8;background:#1b2230;">⚡&nbsp;Ignitions</a><a href="ipo.html" style="text-decoration:none;flex:0 0 auto;border:1px solid #262e3d;border-radius:8px;padding:6px 13px;font-size:12.5px;font-weight:600;white-space:nowrap;background:#7c5cff;color:#fff;border-color:#7c5cff;">🆕&nbsp;IPO Monitor</a><a href="x_signals.html" style="text-decoration:none;flex:0 0 auto;border:1px solid #262e3d;border-radius:8px;padding:6px 13px;font-size:12.5px;font-weight:600;white-space:nowrap;color:#8b97a8;background:#1b2230;">🐦&nbsp;X Signals</a></nav>
+<header><h1>🆕 IPO Monitor</h1><span class="pill" id="cnt"></span><span class="pill" id="gen"></span></header>
+<div class="note">GMP = <b>unofficial grey-market premium</b> (speculative, updates through the day). The listing-gain range blends GMP% with subscription demand — a <b>scenario, not a forecast</b>. Weak subscription = GMP often doesn't hold. Not investment advice.</div>
+<div id="setup" style="display:none;padding:40px 20px;text-align:center;color:var(--mut)">
+  <div style="font-size:15px;color:var(--txt);margin-bottom:10px">IPO Monitor needs a (free) IPO Guru API key</div>
+  1. Register free at <a href="https://www.ipoguru.in" style="color:var(--blue)">ipoguru.in</a> → get your API key<br>
+  2. Add <code style="color:var(--amber)">IPOGURU_API_KEY=your_key</code> to api_credentials.txt<br>
+  3. Run <code style="color:var(--amber)">python3 ipo_monitor.py</code> (or wait for the scheduled routine)
+</div>
+<div id="tbl"></div>
+<script>
+const DATA={"generated": "2026-08-10 13:52", "ipos": [], "no_key": true};
+if(DATA.no_key){document.getElementById('setup').style.display='block';document.getElementById('cnt').textContent='setup required';}
+else{
+document.getElementById('cnt').textContent=DATA.ipos.length+' IPOs';
+document.getElementById('gen').textContent='updated '+DATA.generated;
+const fmt=(v,d=0)=>v==null?'—':Number(v).toLocaleString('en-IN',{minimumFractionDigits:d,maximumFractionDigits:d});
+function rng(r){if(r.est_lo==null)return '<span class=mut>—</span>';
+  const c=r.est_hi<0?'rr':'rg';
+  return `<span class="range ${c}">${r.est_lo>0?'+':''}${r.est_lo}% … ${r.est_hi>0?'+':''}${r.est_hi}%</span>`+
+    (r.est_lo_px?`<div class=mut style=font-size:10.5px>₹${fmt(r.est_lo_px)}–${fmt(r.est_hi_px)}</div>`:'');}
+function gmp(r){if(r.gmp_pct==null)return '<span class=mut>—</span>';
+  const c=r.gmp_pct>=0?'gmp-pos':'gmp-neg';
+  return `<span class="${c}">${r.gmp_rs!=null?'₹'+fmt(r.gmp_rs):''} (${r.gmp_pct>=0?'+':''}${r.gmp_pct}%)</span>`;}
+let h='<table><thead><tr><th class=l>IPO</th><th>Status</th><th>Price band</th><th>GMP</th>'+
+ '<th>Est. Listing Gain</th><th>Sub (x)</th><th>QIB/NII/Ret</th><th>Open</th><th>Close</th><th>Listing</th><th class=l>Size</th></tr></thead><tbody>';
+if(!DATA.ipos.length)h+='<tr><td colspan=11 style="text-align:center;color:#8b97a8;padding:30px">No open or upcoming IPOs right now</td></tr>';
+for(const r of DATA.ipos){
+ const st=r.status==='open'?'<span class=open>OPEN</span>':'<span class=upc>UPCOMING</span>';
+ const sme=r.type&&r.type.toUpperCase().includes('SME')?'<span class=sme>SME</span>':'';
+ h+=`<tr><td class="l nm">${r.name||'—'}${sme}</td><td>${st}</td><td>${r.price_band||'—'}</td>`+
+   `<td>${gmp(r)}</td><td class=l>${rng(r)}</td><td>${fmt(r.sub_total,1)}${r.sub_total!=null?'x':''}</td>`+
+   `<td class=mut style=font-size:11px>${fmt(r.sub_qib,1)}/${fmt(r.sub_nii,1)}/${fmt(r.sub_retail,1)}</td>`+
+   `<td>${r.open||'—'}</td><td>${r.close||'—'}</td><td>${r.listing||'—'}</td><td class="l mut">${r.issue_size||'—'}</td></tr>`;
+}
+document.getElementById('tbl').innerHTML=h+'</tbody></table>';
+}
+</script></body></html>

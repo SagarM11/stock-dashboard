@@ -1,0 +1,57 @@
+<!doctype html><html><head><meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/><title>Cash Positions</title><style>
+:root{--bg:#0b0e14;--line:#262e3d;--panel:#141a24;--panel2:#1b2230;--txt:#e6edf3;--mut:#8b97a8;--green:#2ecc71;--amber:#ffb74d;--red:#ff5c5c;--blue:#5b9dff}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--txt);font:13px/1.5 -apple-system,Segoe UI,Roboto,sans-serif;-webkit-text-size-adjust:100%;overflow-x:hidden}
+.wrap{max-width:1200px;margin:0 auto;padding:14px}h1{font-size:17px;margin:0 0 2px}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin:12px 0}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:11px 13px}
+.card .k{color:var(--mut);font-size:10px;text-transform:uppercase;letter-spacing:.04em}
+.card .val{font-size:20px;font-weight:800;margin-top:3px}
+.pos{color:var(--green)}.neg{color:var(--red)}.mut{color:var(--mut)}
+.regime{border-radius:10px;padding:11px 15px;margin:10px 0;font-size:13px;font-weight:600}
+.regime.on{background:rgba(46,204,113,.09);border:1px solid rgba(46,204,113,.3);color:var(--green)}
+.regime.off{background:rgba(255,92,92,.1);border:1px solid rgba(255,92,92,.35);color:var(--red)}
+.note{padding:9px 13px;color:var(--amber);font-size:11.5px;background:rgba(255,183,77,.07);border:1px solid rgba(255,183,77,.2);border-radius:9px;margin:10px 0}
+.sec{background:var(--panel);border:1px solid var(--line);border-radius:10px;margin:12px 0;overflow:hidden}
+.sec h2{font-size:12px;text-transform:uppercase;letter-spacing:.05em;color:var(--mut);margin:0;padding:10px 13px;border-bottom:1px solid var(--line)}
+#tbl{overflow-x:auto;-webkit-overflow-scrolling:touch}
+table{width:100%;border-collapse:collapse;min-width:1000px}th,td{padding:8px 10px;text-align:right;white-space:nowrap;font-size:12.5px}
+th.l,td.l{text-align:left}th{color:var(--mut);font-size:10px;text-transform:uppercase;border-bottom:1px solid var(--line);position:sticky;top:0;background:#10151f}
+td{border-bottom:1px solid #161c28}tbody tr:hover td{background:var(--panel2)}
+.sym{font-weight:800}.big{font-weight:800}.rs{font-weight:700}.bar{height:5px;border-radius:3px;background:#20304a;overflow:hidden;min-width:44px}.bar>i{display:block;height:100%;background:var(--green)}
+@media(max-width:760px){.card .val{font-size:17px}th,td{padding:7px 8px}}
+</style></head><body><nav class="xnav" style="display:flex;gap:6px;overflow-x:auto;-webkit-overflow-scrolling:touch;padding:8px 14px;border-bottom:1px solid #262e3d;background:#0b0e14;align-items:center;"><a href="home.html" style="text-decoration:none;flex:0 0 auto;border:1px solid #262e3d;border-radius:8px;padding:6px 13px;font-size:12.5px;font-weight:600;white-space:nowrap;color:#8b97a8;background:#1b2230;">🖥️&nbsp;Desk</a><a href="candidates.html" style="text-decoration:none;flex:0 0 auto;border:1px solid #262e3d;border-radius:8px;padding:6px 13px;font-size:12.5px;font-weight:600;white-space:nowrap;color:#8b97a8;background:#1b2230;">🎯&nbsp;Candidates</a><a href="cash.html" style="text-decoration:none;flex:0 0 auto;border:1px solid #262e3d;border-radius:8px;padding:6px 13px;font-size:12.5px;font-weight:600;white-space:nowrap;background:#7c5cff;color:#fff;border-color:#7c5cff;">💵&nbsp;Cash EV</a><a href="index.html" style="text-decoration:none;flex:0 0 auto;border:1px solid #262e3d;border-radius:8px;padding:6px 13px;font-size:12.5px;font-weight:600;white-space:nowrap;color:#8b97a8;background:#1b2230;">📊&nbsp;Dashboard</a><a href="fno.html" style="text-decoration:none;flex:0 0 auto;border:1px solid #262e3d;border-radius:8px;padding:6px 13px;font-size:12.5px;font-weight:600;white-space:nowrap;color:#8b97a8;background:#1b2230;">⚡&nbsp;F&O</a><a href="radar.html" style="text-decoration:none;flex:0 0 auto;border:1px solid #262e3d;border-radius:8px;padding:6px 13px;font-size:12.5px;font-weight:600;white-space:nowrap;color:#8b97a8;background:#1b2230;">🚀&nbsp;Radar</a><a href="ignitions.html" style="text-decoration:none;flex:0 0 auto;border:1px solid #262e3d;border-radius:8px;padding:6px 13px;font-size:12.5px;font-weight:600;white-space:nowrap;color:#8b97a8;background:#1b2230;">⚡&nbsp;Ignitions</a><a href="ipo.html" style="text-decoration:none;flex:0 0 auto;border:1px solid #262e3d;border-radius:8px;padding:6px 13px;font-size:12.5px;font-weight:600;white-space:nowrap;color:#8b97a8;background:#1b2230;">🆕&nbsp;IPO Monitor</a><a href="x_signals.html" style="text-decoration:none;flex:0 0 auto;border:1px solid #262e3d;border-radius:8px;padding:6px 13px;font-size:12.5px;font-weight:600;white-space:nowrap;color:#8b97a8;background:#1b2230;">🐦&nbsp;X Signals</a></nav>
+<div class="wrap">
+<h1>💵 Cash Positions</h1><div class="mut" style="font-size:11.5px" id="sub"></div>
+<div id="regime"></div>
+<div id="cards" class="grid"></div>
+<div class="note" id="method"></div>
+<div class="sec"><h2 id="tblhead">Best cash positions — ranked by expected value</h2><div id="tbl"></div></div>
+<div class="note">EV = P(target)·(3·ATR reward) − P(stop)·(1.5·ATR risk), where P(touch) comes from each stock's own GARCH(1,1) vol forecast over a 25-session horizon. <b>The vol model is driftless — it sizes the MOVE, not the DIRECTION</b>; direction is assumed from the momentum setup. This ranks vol-adjusted reward/risk; the only backtested edge is the trailing strategy on the 🎯 Candidates / 🖥️ Desk tabs. Not personalised advice.</div>
+</div>
+<script>
+const D={"as_of": "2026-08-25", "generated": "2026-08-25 14:33", "regime": {"ok": false, "label": "NEUTRAL", "nifty": 24149.85, "date": "2026-08-25", "note": "Nifty 50 < 200-DMA \u2014 structural downtrend; treat longs with caution."}, "horizon": 25, "account": 3000000, "n": 6, "n_pos": 6, "best": 0.77, "med_vol": 22.5, "rows": [{"symbol": "ETERNAL", "rs": 98, "score": 74, "close": 328.8, "garch_vol": 30.7, "target": 351.9, "stop": 317.2, "p_target": 0.468, "p_stop": 0.717, "ev_pct": 0.77, "ev_rs": 3284, "qty": 1297, "capital": 426454, "cap_at_risk": 14991, "edge": -0.249}, {"symbol": "HINDALCO", "rs": 94, "score": 68, "close": 1054.8, "garch_vol": 27.9, "target": 1123.7, "stop": 1020.3, "p_target": 0.457, "p_stop": 0.71, "ev_pct": 0.67, "ev_rs": 2990, "qty": 426, "capital": 449345, "cap_at_risk": 14685, "edge": -0.253}, {"symbol": "LT", "rs": 96, "score": 73, "close": 4078.6, "garch_vol": 18.3, "target": 4236.0, "stop": 3999.9, "p_target": 0.503, "p_stop": 0.738, "ev_pct": 0.52, "ev_rs": 2328, "qty": 110, "capital": 448646, "cap_at_risk": 8655, "edge": -0.235}, {"symbol": "BAJAJ-AUTO", "rs": 100, "score": 75, "close": 11770.0, "garch_vol": 20.8, "target": 12336.3, "stop": 11486.8, "p_target": 0.462, "p_stop": 0.713, "ev_pct": 0.51, "ev_rs": 2271, "qty": 38, "capital": 447260, "cap_at_risk": 10760, "edge": -0.251}, {"symbol": "JSWSTEEL", "rs": 90, "score": 67, "close": 1322.3, "garch_vol": 22.5, "target": 1396.0, "stop": 1285.4, "p_target": 0.432, "p_stop": 0.694, "ev_pct": 0.47, "ev_rs": 2119, "qty": 340, "capital": 449582, "cap_at_risk": 12529, "edge": -0.263}, {"symbol": "KOTAKBANK", "rs": 92, "score": 67, "close": 399.9, "garch_vol": 19.3, "target": 420.1, "stop": 389.9, "p_target": 0.407, "p_stop": 0.678, "ev_pct": 0.34, "ev_rs": 1529, "qty": 1125, "capital": 449944, "cap_at_risk": 11328, "edge": -0.272}]};
+const inr=v=>'₹'+Number(v||0).toLocaleString('en-IN');
+document.getElementById('sub').textContent=`as of ${D.as_of} · rebuilt ${D.generated} · account ${inr(D.account)} · 0.5%/trade · horizon ${D.horizon} sessions`;
+const R=D.regime;
+document.getElementById('regime').innerHTML=`<div class="regime ${R.ok?'on':'off'}">${R.ok?'🟢 REGIME RISK-ON':'🔴 REGIME RISK-OFF'} · ${R.label}${R.nifty?` · Nifty ${inr(R.nifty)}`:''} · ${R.note}</div>`;
+const cards=[['Best EV%',D.best==null?'—':(D.best>0?'+':'')+D.best+'%',D.best>0?'pos':'neg'],
+  ['Positive-EV names',D.n_pos+' / '+D.n','mut'],['Median GARCH vol',D.med_vol+'%','mut'],['Ranked',D.n,'mut']];
+document.getElementById('cards').innerHTML=cards.map(([k,v,cl])=>`<div class=card><div class=k>${k}</div><div class="val ${cl}">${v}</div></div>`).join('');
+document.getElementById('method').innerHTML=`Ranked by <b>EV%</b> — expected value as a % of capital, from a per-stock <b>GARCH(1,1)</b> volatility forecast. A positive EV% means the vol-implied odds of touching +3·ATR before −1.5·ATR favour the trade over the next ${D.horizon} sessions. <b>P(t)</b>=touch target, <b>P(s)</b>=touch stop, <b>edge</b>=P(t)−P(s).`;
+const rows=D.rows;
+document.getElementById('tblhead').textContent=`Best cash positions — ${rows.length} ranked by EV%`;
+if(!rows.length){document.getElementById('tbl').innerHTML='<div style="padding:22px;color:#8b97a8">No positions to rank.</div>';}
+else{
+const cls=v=>v>0?'pos':v<0?'neg':'mut';
+let h='<table><thead><tr><th class=l>#</th><th class=l>Symbol</th><th>RS</th><th>Close</th><th>GARCH σ</th><th>Target</th><th>Stop</th><th>P(t)</th><th>P(s)</th><th>Edge</th><th>EV%</th><th>EV ₹</th><th>Qty</th><th>Capital</th></tr></thead><tbody>';
+rows.forEach((r,i)=>{
+ h+=`<tr><td class="l mut">${i+1}</td><td class="l sym">${r.symbol}</td><td class="rs">${r.rs??'—'}</td>`+
+    `<td>${inr(r.close)}</td><td>${r.garch_vol}%</td><td class="pos">${inr(r.target)}</td><td class="neg">${inr(r.stop)}</td>`+
+    `<td>${r.p_target}</td><td>${r.p_stop}</td><td class="${cls(r.edge)}">${r.edge>0?'+':''}${r.edge}</td>`+
+    `<td class="big ${cls(r.ev_pct)}">${r.ev_pct>0?'+':''}${r.ev_pct}%</td><td class="${cls(r.ev_rs)}">${r.ev_rs>0?'+':''}${inr(r.ev_rs)}</td>`+
+    `<td>${r.qty}</td><td>${inr(r.capital)}</td></tr>`;
+});
+document.getElementById('tbl').innerHTML=h+'</tbody></table>';
+}
+</script></body></html>
